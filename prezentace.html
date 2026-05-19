@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Základy AI pro veterinární praxi</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0F172A',
+                        teal: '#0EA5E9',
+                        lightbg: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.demo-tab').forEach(t => {
+                t.classList.add('hidden');
+                t.classList.remove('animate-fade-in');
+            });
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('bg-teal', 'text-white');
+                b.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            const active = document.getElementById(tabId);
+            active.classList.remove('hidden');
+            active.classList.add('animate-fade-in');
+
+            document.getElementById('btn-' + tabId).classList.remove('bg-gray-100', 'text-gray-600');
+            document.getElementById('btn-' + tabId).classList.add('bg-teal', 'text-white');
+        }
+    </script>
+    <style>
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes subtlePulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(14, 165, 233, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+            }
+        }
+
+        .btn-pulse {
+            animation: subtlePulse 2s infinite;
+        }
+
+        .media-container { border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255,255,255,0.1); }
+        video.bg-vid { object-fit: cover; width: 100%; height: 100%; opacity: 0.4; }
+
+        /* Optimalizace pro fullscreen prezentaci */
+        html, body {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+        }
+        body::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+        
+        /* Zabrání přetékání vysokých obrázků a videí mimo viewport */
+        .media-container img, .media-container video {
+            max-height: 35vh;
+            width: 100%;
+            object-fit: cover;
+            margin: 0 auto;
+        }
+        
+        /* Speciální úprava pro porovnávací média v záložkách */
+        .demo-tab .media-container video, .demo-tab img {
+            max-height: 25vh;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body class="bg-lightbg text-gray-800 font-sans antialiased relative">
+
+    <!-- Progress Bar -->
+    <div id="progressBar" class="fixed top-0 left-0 h-1.5 bg-teal z-50 transition-all duration-150 rounded-r-full"
+        style="width: 0%; box-shadow: 0 0 10px rgba(14,165,233,0.8);"></div>
+
+    <!-- Hero Section -->
+    <header
+        class="bg-navy text-white min-h-screen flex flex-col justify-center relative px-6 py-12 lg:py-16 overflow-hidden">
+        
+        <!-- Video pozadí -->
+        <div class="absolute inset-0 z-0">
+             <video autoplay muted loop playsinline class="bg-vid">
+                <source src="vid3.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <!-- Subtle Grid Pattern Background -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none z-0"
+            style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;">
+        </div>
+
+        <div class="max-w-5xl mx-auto w-full relative z-10">
+            <div
+                class="inline-block bg-teal/20 text-teal-300 px-4 py-2 rounded-full font-semibold text-sm mb-6 border border-teal/30 backdrop-blur-sm">
+                19. 5. 2026 | Havlíčkův Brod
+            </div>
+            <h1 class="text-5xl md:text-7xl font-heading font-extrabold mb-6 leading-tight tracking-tight drop-shadow-lg">
+                Umělá inteligence<br>ve <span class="text-teal">veterinární praxi</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl font-light">
+                Odhalte, jak získat zpět čas, zbavit se otravné administrativy a bezpečně využít AI jako svou neúnavnou
+                sekretářku.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="#proc"
+                    class="bg-teal hover:bg-teal-600 text-white font-bold py-4 px-8 rounded-lg text-center transition-colors text-lg btn-pulse shadow-lg shadow-teal/30">
+                    Začít prohlídku
+                </a>
+            </div>
+
+            <div
+                class="mt-12 mb-8 flex items-center gap-6 bg-slate-900/60 p-5 pr-8 rounded-full border border-white/10 backdrop-blur-sm self-start shadow-xl">
+                <img src="foto.jpg" alt="Mgr. Gabriel Kožík"
+                    class="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-teal shadow-[0_0_20px_rgba(14,165,233,0.5)]">
+                <div>
+                    <div class="font-heading font-bold text-3xl md:text-4xl text-white tracking-wide">Mgr. Gabriel Kožík
+                    </div>
+                    <div class="text-lg md:text-xl text-teal-400 font-medium mt-1">Advokát & Lektor AI pro praxi</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Proč to řešit -->
+    <section id="proc" class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-white reveal">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold text-navy mb-8 lg:mb-10 text-center">Slon v ordinaci: „Ale ChatGPT říkal...“</h2>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="media-container mb-8">
+                        <img src="pic2.png" alt="Rizika AI" class="w-full">
+                    </div>
+                    <p class="text-lg mb-6">Proč se vůbec bavit o umělé inteligenci, když máte plné ruce práce se
+                        zvířaty?</p>
+                    <ul class="space-y-4">
+                        <li class="flex gap-4 items-start">
+                            <div class="bg-red-100 text-red-600 p-2 rounded-full mt-1"><i class="fas fa-search"></i>
+                            </div>
+                            <div>
+                                <strong class="block text-navy">Klienti už AI používají</strong>
+                                Majitelé si diagnostikují zvířata sami a chodí k vám s hotovými (a často mylnými)
+                                diagnózami.
+                            </div>
+                        </li>
+                        <li class="flex gap-4 items-start">
+                            <div class="bg-teal/10 text-teal p-2 rounded-full mt-1"><i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div>
+                                <strong class="block text-navy">Nutnost se bránit</strong>
+                                Abyste mohli vyvracet dezinformace a obhájit svůj postup, musíte vědět, jak tyto systémy
+                                fungují a kde chybují.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-gray-50 p-8 rounded-2xl border border-gray-200 shadow-sm relative flex flex-col justify-center">
+                        <div class="media-container mb-6 shadow-md border-gray-200">
+                            <img src="pic9.png" alt="Hlas z terénu" class="w-full">
+                        </div>
+                        <div class="absolute -top-4 -left-4 bg-teal text-white p-3 rounded-lg shadow-lg">
+                            <i class="fas fa-quote-left text-xl"></i>
+                        </div>
+                        <p class="italic text-gray-600 text-lg mb-4 mt-2">
+                            „Počítače a papírování se snažíme a priori odsunout. Chceme řešit pacienty.“
+                        </p>
+                        <p class="text-sm font-bold text-navy">— Hlas z terénu</p>
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <strong class="text-teal">Řešení:</strong> AI tu není od toho, aby vás nahradila v medicíně, ale
+                            aby odfiltrovala těch 60 % času, který trávíte administrativou.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Kdo vás provede (Bio) -->
+    <section id="kdo-jsem" class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-slate-50 reveal">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                
+                <!-- Foto / Grafika -->
+                <div class="md:w-1/3 flex justify-center relative">
+                    <div class="relative w-64 h-64 rounded-full border-8 border-white shadow-xl overflow-hidden">
+                        <img src="foto2.jpg" alt="Mgr. Gabriel Kožík" class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute -bottom-2 -right-2 bg-navy text-white w-20 h-20 rounded-full flex items-center justify-center text-3xl border-4 border-white shadow-lg">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                </div>
+
+                <!-- Textová část -->
+                <div class="md:w-2/3">
+                    <span class="text-teal font-bold tracking-wider text-sm uppercase mb-2 block">O lektorovi</span>
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-navy mb-4">Kdo vás dneškem provede?</h2>
+                    <p class="text-lg text-gray-700 mb-6 leading-relaxed">
+                        Jmenuji se <strong>Gabriel Kožík</strong>. Jsem advokát, AI stratég a networker. Pomáhám podnikatelům růst bezpečněji díky právní ochraně, chytrému využití umělé inteligence a silným kontaktům. Zjednodušeně řečeno – <em>propojuji světy a lidi</em>.
+                    </p>
+                    
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <!-- Pilíř 1: Právo -->
+                        <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:border-teal transition-colors">
+                            <h4 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-gavel text-teal text-lg"></i> Právní jistota</h4>
+                            <p class="text-sm text-gray-600">Jako advokát a partner v kanceláři <strong>IUSTORIA</strong> vím, že každá inovace musí mít právní mantinely. Řeším AI compliance, obchodní právo a smluvní bezpečnost.</p>
+                        </div>
+                        
+                        <!-- Pilíř 2: AI -->
+                        <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:border-teal transition-colors">
+                            <h4 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-robot text-teal text-lg"></i> AI v praxi</h4>
+                            <p class="text-sm text-gray-600">Jako AI stratég učím firmy a experty převést umělou inteligenci z "teoretické hračky" do role každodenního asistenta pro maximální efektivitu.</p>
+                        </div>
+
+                        <!-- Pilíř 3: Networking -->
+                        <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm sm:col-span-2 hover:border-teal transition-colors">
+                            <h4 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-users text-teal text-lg"></i> Byznys Networking</h4>
+                            <p class="text-sm text-gray-600">Věřím, že kvalitní byznys stojí na vztazích. Jsem jednatelem společnosti Pálava Horizons a provozuji klub <strong>Pod Pálavou</strong>. Aktivně spojuji lidi, firmy a příležitosti.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+ <!-- NOVÁ SEKCE: Jaké typy AI máme kolem sebe -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-white reveal">
+        <div class="max-w-5xl mx-auto w-full">
+            <div class="text-center mb-8 lg:mb-10">
+                <span class="text-teal font-bold tracking-wider text-sm uppercase">Zorientujme se v pojmech</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-navy mt-2">Džungle jménem umělá inteligence</h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">Slovo "AI" dnes vidíme všude, od chytrých praček po precizní medicínu. Než začneme, pojďme si ukázat 3 základní šuplíky, abychom věděli, v jakém z nich budeme dnes operovat.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 lg:gap-6 items-stretch">
+                <!-- Typ 1: Každodenní -->
+                <div class="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-200 shadow-sm flex flex-col opacity-80 hover:opacity-100 transition-opacity duration-300">
+                    <div class="w-12 h-12 bg-gray-200 text-gray-600 rounded-lg flex items-center justify-center text-xl mb-6">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold text-navy mb-2">1. Neviditelná (Prediktivní) AI</h3>
+                    <p class="text-gray-600 text-sm mb-6 flex-grow">Funguje na pozadí už roky. Analyzuje historická data a předpovídá, co se stane, nebo co by se vám mohlo líbit.</p>
+                    <div class="bg-white p-4 rounded-xl border border-gray-100">
+                        <strong class="block text-xs text-gray-400 uppercase mb-2">Příklady z praxe:</strong>
+                        <ul class="text-sm text-navy font-medium space-y-2">
+                            <li>• Navigace Waze (kudy jet)</li>
+                            <li>• Třídění spamu v e-mailu</li>
+                            <li>• Algoritmy Netflixu a TikToku</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Typ 2: Diagnostická -->
+                <div class="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-200 shadow-sm flex flex-col opacity-80 hover:opacity-100 transition-opacity duration-300">
+                    <div class="w-12 h-12 bg-gray-200 text-gray-600 rounded-lg flex items-center justify-center text-xl mb-6">
+                        <i class="fas fa-x-ray"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold text-navy mb-2">2. Počítačové vidění (Vision)</h3>
+                    <p class="text-gray-600 text-sm mb-6 flex-grow">AI trénovaná čistě na hledání a rozpoznávání vzorců v obraze. Neumí psát maily, ale přesně vidí to, co vybledlé oko přehlédne.</p>
+                    <div class="bg-white p-4 rounded-xl border border-gray-100">
+                        <strong class="block text-xs text-gray-400 uppercase mb-2">Příklady z praxe:</strong>
+                        <ul class="text-sm text-navy font-medium space-y-2">
+                            <li>• <span class="text-teal font-bold">SignalPET</span> (čtení RTG)</li>
+                            <li>• Analýza krevních nátěrů</li>
+                            <li>• Čtení SPZ na parkovišti</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Typ 3: Generativní (Highlight) -->
+                <div class="bg-navy p-6 md:p-8 rounded-2xl border-2 border-teal shadow-[0_10px_30px_rgba(14,165,233,0.2)] flex flex-col relative transform md:-translate-y-4">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-teal text-white font-bold py-1 px-4 rounded-full text-xs uppercase tracking-wider whitespace-nowrap shadow-md">
+                        Naše dnešní téma
+                    </div>
+                    <div class="w-12 h-12 bg-teal/20 text-teal-400 rounded-lg flex items-center justify-center text-xl mb-6 mt-2">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold text-white mb-2">3. Generativní AI (LLM)</h3>
+                    <p class="text-gray-300 text-sm mb-6 flex-grow">Netřídí data, ale <strong>tvoří nový, originální obsah</strong> (texty, obrázky, sumarizace) na základě vaší konverzace. Vaše nová sekretářka.</p>
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                        <strong class="block text-xs text-teal-500 uppercase mb-2">Příklady z praxe:</strong>
+                        <ul class="text-sm text-white font-medium space-y-2">
+                            <li>• <span class="text-teal-300 font-bold">ChatGPT</span> (OpenAI)</li>
+                            <li>• <span class="text-teal-300 font-bold">Gemini</span> (Google)</li>
+                            <li>• Copilot (Microsoft)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-10 md:mt-16 bg-red-50 border border-red-100 p-5 rounded-xl text-center max-w-3xl mx-auto flex items-center justify-center gap-4">
+                <i class="fas fa-exclamation-triangle text-red-400 text-2xl hidden sm:block"></i>
+                <p class="text-gray-700 text-sm">Nejčastější chybou v praxi je, že lidé očekávají od <strong class="text-navy">Generativní AI</strong> <em>(ChatGPT)</em> bezchybnou exaktnost, která je typická pro <strong class="text-navy">Diagnostickou AI</strong> <em>(SignalPET)</em>. Proto vznikají omyly.</p>
+            </div>
+        </div>
+    </section>    
+    
+
+<!-- Co je a co není AI -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-slate-900 text-white reveal">
+        <div class="max-w-6xl mx-auto w-full">
+            <div class="grid md:grid-cols-2 gap-8 items-center mb-8 lg:mb-10">
+                <div class="text-left">
+                    <span class="text-teal-400 font-bold tracking-wider text-sm uppercase">Základní pravidla hry</span>
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold mt-2 mb-4">Co je a co naopak NENÍ umělá inteligence?</h2>
+                    <p class="text-gray-400 text-lg">Než začneme delegovat úkoly, pojďme si nastavit správná
+                        očekávání. AI není magický vševěd, ale mimořádně efektivní pravděpodobnostní kalkulačka.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="media-container h-48 border-slate-700">
+                        <img src="pic6.png" alt="Tech" class="h-full w-full object-cover">
+                    </div>
+                    <div class="media-container h-48 border-slate-700">
+                        <video autoplay muted loop playsinline class="h-full w-full object-cover">
+                            <source src="vid4.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Co JE AI -->
+                <div
+                    class="bg-slate-800/80 p-6 md:p-8 rounded-3xl border-t-4 border-teal shadow-[0_10px_30px_rgba(14,165,233,0.1)]">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div
+                            class="w-14 h-14 bg-teal/20 text-teal rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <h3 class="text-2xl font-heading font-bold">Co <span class="text-teal-400">JE</span> AI</h3>
+                    </div>
+
+                    <ul class="space-y-4 lg:space-y-8">
+                        <li class="flex gap-4">
+                            <div class="text-teal-400 text-xl mt-1"><i class="fas fa-magic"></i></div>
+                            <div>
+                                <strong class="block text-lg mb-1">Pokročilý našeptávač</strong>
+                                <p class="text-gray-400 text-sm leading-relaxed">Funguje jako chytřejší klávesnice v
+                                    mobilu. Nečte si z učebnice, ale na základě miliard textů "hádá" nejpravděpodobnější
+                                    další slovo.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="text-teal-400 text-xl mt-1"><i class="fas fa-briefcase"></i></div>
+                            <div>
+                                <strong class="block text-lg mb-1">Neúnavná sekretářka</strong>
+                                <p class="text-gray-400 text-sm leading-relaxed">Bleskově zpracuje zprávy pro klienty,
+                                    zformuluje maily, utřídí poznámky z vyšetření a připraví příspěvky na sítě.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="text-teal-400 text-xl mt-1"><i class="fas fa-eye"></i></div>
+                            <div>
+                                <strong class="block text-lg mb-1">„Druhý pár očí“</strong>
+                                <p class="text-gray-400 text-sm leading-relaxed">Úzce specializované modely (např. na
+                                    RTG) vás upozorní na anomálie, které unavené lidské oko o půlnoci může snadno
+                                    přehlédnout.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Co NENÍ AI -->
+                <div
+                    class="bg-slate-800/80 p-6 md:p-8 rounded-3xl border-t-4 border-red-500 shadow-[0_10px_30px_rgba(239,68,68,0.1)]">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div
+                            class="w-14 h-14 bg-red-500/20 text-red-500 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <h3 class="text-2xl font-heading font-bold">Co <span class="text-red-500">NENÍ</span> AI</h3>
+                    </div>
+
+                    <ul class="space-y-4 lg:space-y-8">
+                        <li class="flex gap-4">
+                            <div class="text-red-500 text-xl mt-1"><i class="fas fa-user-md"></i></div>
+                            <div>
+                                <strong class="block text-lg mb-1">Neomylný doktor</strong>
+                                <p class="text-gray-400 text-sm leading-relaxed">Nemá žádné skutečné klinické
+                                    zkušenosti. Chybí jí kontext reality, zvíře si nemůže "osahat" ani ho vidět.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="text-red-500 text-xl mt-1"><i class="fas fa-brain"></i></div>
+                            <div>
+                                <strong class="block text-lg mb-1">Vševědoucí mozek</strong>
+                                <p class="text-gray-400 text-sm leading-relaxed">Když systém odpověď nezná, často to
+                                    nepřizná. Místo toho si ji naprosto suverénně a přesvědčivě vymyslí (halucinuje).
+                                </p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="text-red-500 text-xl mt-1"><i class="fas fa-gavel"></i></div>
+                            <div>
+                                <strong class="block text-lg mb-1">Vaše náhrada</strong>
+                                <p class="text-gray-400 text-sm leading-relaxed">Nemůže převzít vaši zodpovědnost. Za
+                                    každé medicínské rozhodnutí nesete právní i etickou odpovědnost vždy jen a pouze vy.
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI není vyhledávač -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-white reveal">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                <div class="md:w-1/3 flex flex-col gap-4 justify-center">
+                    <div class="media-container border border-gray-200 shadow-lg">
+                        <video autoplay muted loop playsinline class="w-full">
+                            <source src="vid7.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <div class="media-container border border-gray-200 shadow-lg">
+                        <img src="pic1.png" alt="Přemýšlení" class="w-full">
+                    </div>
+                </div>
+
+                <!-- Text -->
+                <div class="md:w-2/3">
+                    <span class="text-red-500 font-bold tracking-wider text-sm uppercase mb-2 block">Kritická chyba
+                        začátečníků</span>
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-navy mb-6">AI není Google. Nevyhledává,
+                        ale vymýšlí</h2>
+
+                    <div class="space-y-6 text-gray-700">
+                        <p class="text-lg">Základní bezplatné modely <strong class="text-red-500">nemají přímý přístup k
+                                aktuálním databázím</strong> a neumí klasicky "hledat". Když se jich zeptáte na vzácný
+                            fakt, nesáhnou do knihovny. Místo toho generují text, který zní odborně a pravděpodobně, i
+                            když je nesmyslný.</p>
+
+                        <div class="bg-amber-50 border-l-4 border-amber-400 p-5 rounded-r-lg">
+                            <h4 class="font-bold text-amber-800 mb-2">Halucinace v praxi</h4>
+                            <p class="text-sm text-amber-800">Pokud se AI zeptáte na neobvyklé dávkování léků, dokáže
+                                vygenerovat výpočet a dávkování, které vypadá matematicky naprosto přesně, ale ve
+                                skutečnosti si ho "vymyslela" poskládáním slov ze dvou nesouvisejících studií.</p>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h4 class="font-bold text-navy mb-4 text-xl">Jak na odbornou rešerši správně?</h4>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div
+                                    class="bg-lightbg p-5 rounded-xl border border-gray-200 hover:border-teal transition-colors">
+                                    <strong class="block text-teal-600 mb-1"><i class="fas fa-link mr-2"></i>Perplexity
+                                        AI</strong>
+                                    <p class="text-sm text-gray-600">Nástroj stavěný na rešerše. Nejprve prohledá
+                                        internet a studie, a u každého tvrzení vám doloží přesný (klikací) odkaz na
+                                        zdroj.</p>
+                                </div>
+                                <div
+                                    class="bg-lightbg p-5 rounded-xl border border-gray-200 hover:border-teal transition-colors">
+                                    <strong class="block text-teal-600 mb-1"><i class="fas fa-file-pdf mr-2"></i>Dodání
+                                        kontextu</strong>
+                                    <p class="text-sm text-gray-600">Nahrajte do ChatGPT rovnou celou studii (PDF) a
+                                        přikažte mu: <span class="italic">„Hledej a shrň data POUZE na základě
+                                            přiloženého dokumentu.“</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Poločas a Deepfake -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-navy text-white reveal relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
+        <div class="max-w-6xl mx-auto w-full relative z-10">
+            <div class="text-center mb-10 md:mb-16">
+                <span class="text-teal-400 font-bold tracking-wider text-sm uppercase">Poločasová přestávka</span>
+                <h2 class="text-3xl md:text-5xl font-heading font-extrabold text-white mt-2 drop-shadow-md">Prostor pro dotazy & Odvrácená tvář AI</h2>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-10 items-center">
+                <!-- Video Section -->
+                <div class="flex flex-col">
+                    <div class="media-container border-4 border-teal shadow-[0_0_30px_rgba(14,165,233,0.3)] mb-6 rounded-2xl overflow-hidden bg-black max-h-[50vh]">
+                        <video autoplay muted loop playsinline class="w-full h-full object-contain">
+                            <source src="vid10.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <div class="bg-slate-800/80 p-5 rounded-xl border-l-4 border-teal shadow-lg">
+                        <h4 class="font-bold text-teal-400 mb-2 flex items-center gap-2"><i class="fas fa-mask"></i> Ztráta identity (Deepfake)</h4>
+                        <p class="text-sm text-gray-300">Technologie dokáže v reálném čase naklonovat váš hlas i tvář. Pokud vám "zavolá" klient z neznámého čísla s prosbou o okamžitou konzultaci a sdělení údajů z karty, vždy si identitu ověřte.</p>
+                    </div>
+                </div>
+
+                <!-- Q&A & Break Section -->
+                <div class="space-y-8">
+                    <!-- Q&A -->
+                    <div class="bg-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-sm transform transition hover:-translate-y-1">
+                        <div class="w-16 h-16 bg-teal/20 text-teal-400 rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-inner">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Máte slovo</h3>
+                        <p class="text-gray-300 mb-4">Máme za sebou teorii, limity a nebezpečí AI. Než se vrhneme na praktické řešení vaší denní agendy, ptejte se na cokoliv.</p>
+                        <ul class="text-sm text-teal-100 space-y-2 font-mono">
+                            <li><i class="fas fa-angle-right mr-2 text-teal-500"></i>Bezpečnost pacientských dat?</li>
+                            <li><i class="fas fa-angle-right mr-2 text-teal-500"></i>Rozdíl mezi bezplatnou a placenou (Pro) verzí?</li>
+                            <li><i class="fas fa-angle-right mr-2 text-teal-500"></i>Hrozí mi žaloba za špatnou radu od AI?</li>
+                        </ul>
+                    </div>
+
+                    <!-- Break -->
+                    <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-8 rounded-3xl border border-slate-700 flex items-center gap-6 shadow-xl">
+                        <div class="text-5xl text-gray-600">
+                            <i class="fas fa-coffee"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Následuje přestávka</h3>
+                            <p class="text-gray-400 text-sm">Načerpejte energii. Ve druhé polovině budeme drtit konkrétní ukázky z ordinací a získáte zpět svůj volný čas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Průzkum: Co veterináři reálně potřebují -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-lightbg reveal">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-8 md:mb-10">
+                <span class="text-teal font-bold tracking-wider text-sm uppercase">Odpovídáme na vaše potřeby</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-navy mt-2">S čím vám AI pomůže zítra ráno?
+                </h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Na základě dat přímo z vašich ordinací se nepotřebujete
+                    učit složité rezervační systémy. Potřebujete chytrou sekretářku pro ty nejotravnější úkoly.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Karta 1: Marketing -->
+                <div
+                    class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-teal">
+                    <div
+                        class="w-12 h-12 bg-teal/10 text-teal rounded-lg flex items-center justify-center text-xl mb-6">
+                        <i class="fas fa-hashtag"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold text-navy mb-3">1. Propagace a sítě</h3>
+                    <p class="text-gray-600 text-sm mb-4">9 z 13 lékařů označilo sítě jako největší potřebu. Jak oslovit
+                        klienty, když na to není čas?</p>
+                    <ul class="text-sm text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Posty na FB/IG za 10 sekund</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Články na web o prevenci</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Mapování potřeb klientů</li>
+                    </ul>
+                </div>
+
+                <!-- Karta 2: Komunikace -->
+                <div
+                    class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-navy">
+                    <div
+                        class="w-12 h-12 bg-navy/10 text-navy rounded-lg flex items-center justify-center text-xl mb-6">
+                        <i class="fas fa-envelope-open-text"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold text-navy mb-3">2. Klientské zprávy</h3>
+                    <p class="text-gray-600 text-sm mb-4">Komunikace a přepisování poznámek po ordinační době bere
+                        energii i čas.</p>
+                    <ul class="text-sm text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Zchlazení arogantních e-mailů</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Tvorba srozumitelných zpráv</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Srozumitelné inf. souhlasy</li>
+                    </ul>
+                </div>
+
+                <!-- Karta 3: Podpora -->
+                <div
+                    class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-amber-500">
+                    <div
+                        class="w-12 h-12 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center text-xl mb-6">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold text-navy mb-3">3. „Přítel na telefonu“</h3>
+                    <p class="text-gray-600 text-sm mb-4">Vyhledávání ve studiích a podpora u nestandardních symptomů.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Překlady zahraničních článků</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Rychlá literární rešerše</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Brainstorming nad případy</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kontext je všechno -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-12 px-6 bg-white reveal">
+        <div class="max-w-5xl mx-auto w-full">
+            <div class="text-center mb-6 md:mb-10">
+                <span class="text-teal font-bold tracking-wider text-sm uppercase">Tajemství úspěchu</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-extrabold text-navy mt-2">Bez kontextu = průměr. <span
+                        class="text-teal block sm:inline">Kontext je všechno.</span></h2>
+                <p class="mt-3 text-gray-600 max-w-3xl mx-auto text-base md:text-lg leading-snug">AI sama o sobě neví,
+                    jaký máte cíl. Bez kontextu generuje obecnou "vatu". Kontext je to, co zaostří její pozornost na
+                    správná trénovací data a promění ji ve vašeho expertního asistenta.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 items-stretch">
+                <!-- Bez kontextu -->
+                <div class="bg-gray-50 p-6 rounded-3xl border border-gray-200 flex flex-col">
+                    <div
+                        class="inline-block bg-gray-200 text-gray-600 font-bold py-1 px-4 rounded-full text-xs self-start mb-4 uppercase tracking-wider">
+                        Jak to dělá většina</div>
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-4 relative">
+                        <div
+                            class="absolute -top-3 -right-3 bg-red-100 text-red-500 w-8 h-8 rounded-full flex items-center justify-center border border-red-200">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <p class="font-mono text-gray-800 text-sm">"Napiš zprávu klientovi, že jeho pes musí na
+                            operaci."</p>
+                    </div>
+                    <div class="mt-auto">
+                        <h4 class="font-bold text-navy mb-2 border-b pb-2 text-sm"><i
+                                class="fas fa-robot text-gray-400 mr-2"></i>Výsledek:</h4>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>• Studený, robotický a prázdný text.</li>
+                            <li>• Zní to jako úryvek z letáku.</li>
+                            <li>• Vede k závěru, že "AI prostě nefunguje".</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- S kontextem -->
+                <div
+                    class="bg-slate-900 text-white p-6 rounded-3xl border-2 border-teal shadow-[0_10px_40px_rgba(14,165,233,0.15)] flex flex-col relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 opacity-10 text-teal"><i
+                            class="fas fa-bullseye text-9xl"></i></div>
+                    <div
+                        class="inline-block bg-teal text-white font-bold py-1 px-4 rounded-full text-xs self-start mb-4 uppercase tracking-wider z-10">
+                        Jak to dělá profík</div>
+
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-600 shadow-inner mb-4 relative z-10">
+                        <div
+                            class="absolute -top-3 -right-3 bg-teal text-white w-8 h-8 rounded-full flex items-center justify-center border border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.5)]">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="font-mono text-gray-200 text-sm leading-relaxed">
+                            "Jsi <span class="text-white font-bold bg-sky-500/40 px-1 rounded">empatický
+                                veterinář</span>.
+                            Napiš zprávu pro <span class="text-white font-bold bg-sky-500/40 px-1 rounded">pana Nováka
+                                (laika)</span>.
+                            Jeho jezevčík Ben (12 let) musí na operaci zubů.
+                            <span class="text-white font-bold bg-sky-500/40 px-1 rounded">Uklidni ho</span>, vysvětli
+                            nutnost zákroku, ale buď <span
+                                class="text-white font-bold bg-sky-500/40 px-1 rounded">profesionální. Max 3
+                                odstavce</span>."
+                        </p>
+                    </div>
+                    <div class="mt-auto z-10">
+                        <h4 class="font-bold text-white mb-2 border-b border-slate-700 pb-2 text-sm"><i
+                                class="fas fa-magic text-sky-400 mr-2"></i>Výsledek:</h4>
+                        <ul class="text-sm text-gray-300 space-y-1">
+                            <li>• Okamžitě použitelný text s lidským tónem.</li>
+                            <li>• Zacíleno na správná medicínská data v mozku AI.</li>
+                            <li>• Šetří vám reálný čas bez úprav.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vzorec -->
+            <div
+                class="mt-6 bg-sky-50 border border-sky-200 rounded-2xl p-4 md:p-6 text-center max-w-3xl mx-auto shadow-sm">
+                <p class="text-navy font-bold text-base md:text-lg mb-3">Zlatý vzorec správného kontextu:</p>
+                <div
+                    class="flex flex-wrap justify-center items-center gap-2 text-xs md:text-sm font-mono text-sky-800 font-bold">
+                    <span class="bg-white px-2 py-1 md:px-3 md:py-2 rounded shadow">KDO JSEM</span>
+                    <span class="text-teal">+</span>
+                    <span class="bg-white px-2 py-1 md:px-3 md:py-2 rounded shadow">S KÝM MLUVÍM</span>
+                    <span class="text-teal">+</span>
+                    <span class="bg-white px-2 py-1 md:px-3 md:py-2 rounded shadow">CO PŘESNĚ CHCI</span>
+                    <span class="text-teal">+</span>
+                    <span class="bg-white px-2 py-1 md:px-3 md:py-2 rounded shadow">V JAKÉM TÓNU</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AHA Moment: Živé ukázky -->
+    <section class="min-h-screen flex flex-col justify-center py-6 lg:py-10 px-6 bg-navy text-white reveal">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-6 lg:mb-8">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Živé ukázky: Aha efekt</h2>
+                <p class="text-gray-400">Podívejte se, jak vypadá úspora času v praxi. Žádné složité systémy, jen
+                    jednoduché příkazy (prompty).</p>
+            </div>
+
+            <div class="bg-white text-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+                <div class="flex border-b text-sm sm:text-base flex-wrap sm:flex-nowrap">
+                    <button id="btn-tab1" onclick="switchTab('tab1')"
+                        class="flex-1 py-4 px-2 font-bold bg-teal text-white transition-colors tab-btn min-w-[50%] sm:min-w-0 border-r border-b sm:border-b-0 border-gray-200">Prevence
+                        a Sítě</button>
+                    <button id="btn-tab2" onclick="switchTab('tab2')"
+                        class="flex-1 py-4 px-2 font-bold bg-gray-100 text-gray-600 transition-colors tab-btn min-w-[50%] sm:min-w-0 border-b sm:border-b-0 sm:border-r border-gray-200">Komunikace</button>
+                    <button id="btn-tab3" onclick="switchTab('tab3')"
+                        class="flex-1 py-4 px-2 font-bold bg-gray-100 text-gray-600 transition-colors tab-btn min-w-[50%] sm:min-w-0 border-r border-gray-200">Složitý
+                        případ</button>
+                    <button id="btn-tab4" onclick="switchTab('tab4')"
+                        class="flex-1 py-4 px-2 font-bold bg-gray-100 text-gray-600 transition-colors tab-btn min-w-[50%] sm:min-w-0">Čtení
+                        RTG a Sona</button>
+                </div>
+
+                <!-- Tab 1: Marketing a Prevence -->
+                <div id="tab1" class="p-8 demo-tab">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <div class="text-sm font-bold text-gray-500 uppercase mb-2">Vaše zadání do AI (Prompt)</div>
+                            <div
+                                class="bg-gray-100 p-4 rounded-lg font-mono text-sm text-gray-700 border-l-4 border-teal mb-6">
+                                "Napiš krátký newsletter pro majitele nových štěňat o důležitosti správného očkovacího
+                                schématu a prevence proti parazitům. Zmiň nutnost pravidelných návštěv, použij přátelský
+                                tón a vyzvi je k rezervaci termínu u nás."
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                <i class="far fa-clock"></i> Váš čas: 15 vteřin
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-gray-500 uppercase mb-2">Výsledek (AI)</div>
+                            <div class="bg-blue-50 p-5 rounded-lg border border-blue-100 shadow-inner mb-4">
+                                <p class="font-bold text-blue-900 mb-2">🐶 Vítejte ve štěněcím světě! Máte už svůj
+                                    očkovací plán?</p>
+                                <p class="text-sm text-gray-700 mb-2">Pořízení štěňátka je obrovská radost, ale i
+                                    zodpovědnost. Aby váš nový parťák rostl zdravě a bezpečně objevoval svět, je klíčové
+                                    nastavit správné očkovací schéma a ochranu proti parazitům.</p>
+                                <p class="text-sm text-gray-700 mb-3">Ochráníte ho tak před vážnými nemocemi jako je
+                                    parvoviróza nebo psinka. 🛡️</p>
+                                <p class="text-sm text-gray-700 font-bold">👉 Zastavte se u nás v ordinaci – rádi pejska
+                                    vyšetříme, nastavíme individuální plán a zodpovíme všechny vaše dotazy. Těšíme se na
+                                    vás!</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <img src="pic15.jpg" alt="Style" class="rounded-xl border-4 border-slate-200 shadow-sm">
+                                <div class="media-container h-full rounded-xl">
+                                    <video autoplay muted loop playsinline class="w-full h-full object-cover">
+                                        <source src="vid5.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Komunikace -->
+                <div id="tab2" class="p-8 demo-tab hidden">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <div class="text-sm font-bold text-gray-500 uppercase mb-2">Zadání: Zchlazení emocí</div>
+                            <div
+                                class="bg-gray-100 p-4 rounded-lg font-mono text-sm text-gray-700 border-l-4 border-navy mb-6">
+                                "Napiš profesionální, naprosto slušnou, asertivní odpověď pro klienta. Odmítni jeho
+                                požadavek na dodatečnou slevu za víkendovou pohotovost. Odpověď musí chránit naši
+                                kliniku a nikoho neurazit."
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-lg border border-red-100 text-sm text-red-800">
+                                <i class="fas fa-heartbeat"></i> AI odfiltruje vaši naštvanost a únavu.
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-gray-500 uppercase mb-2">Odpověď odeslaná za 30s</div>
+                            <div
+                                class="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-inner text-sm text-gray-700 space-y-3 mb-4">
+                                <p>Vážený pane Nováku,</p>
+                                <p>děkujeme za Vaši zprávu. Zcela rozumím, že mimořádné veterinární výdaje mohou
+                                    představovat neplánovanou zátěž.</p>
+                                <p>Víkendový pohotovostní příplatek je však pevnou součástí našeho ceníku, neboť nám
+                                    umožňuje udržovat kliniku v pohotovosti a zajistit pro Vaše zvíře okamžitou odbornou
+                                    péči s plným personálním pokrytím i mimo běžné ordinační hodiny. Z tohoto důvodu
+                                    nemůžeme požadovanou slevu aplikovat.</p>
+                                <p>Děkujeme za pochopení a přejeme Vašemu pejskovi brzké zotavení.</p>
+                            </div>
+                            <div class="media-container h-48 rounded-xl border border-gray-200">
+                                <video autoplay muted loop playsinline class="w-full h-full object-cover">
+                                    <source src="vid2.mp4" type="video/mp4">
+                                </video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Rešerše a Second Opinion -->
+                <div id="tab3" class="p-8 demo-tab hidden">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <div class="text-sm font-bold text-red-500 uppercase mb-2">❌ Špatné zadání (Riziko
+                                halucinace!)</div>
+                            <div
+                                class="bg-red-50 p-4 rounded-lg font-mono text-sm text-gray-700 border-l-4 border-red-500 mb-6">
+                                "Jakou nemoc má pes, když hodně pije a zvrací?"
+                            </div>
+                            <p class="text-sm text-red-700 mb-4">Riziko: AI si vymyslí obecné rady nebo začne střílet
+                                diagnózy od boku bez kontextu.</p>
+
+                            <div class="text-sm font-bold text-green-600 uppercase mb-2 mt-4">✅ Správné zadání (Druhý
+                                názor)</div>
+                            <div
+                                class="bg-green-50 p-4 rounded-lg font-mono text-sm text-gray-700 border-l-4 border-green-500">
+                                "Působ jako expert na veterinární internu. Pacient: 8letý kastrovaný kocour, hubne i
+                                přes dobrý apetit, zhoršená kvalita srsti. Vypiš mi 3 nejvíce pravděpodobné
+                                diferenciální diagnózy a ke každé doplň doporučené primární krevní testy."
+                            </div>
+                        </div>
+                        <div class="bg-navy text-white p-6 rounded-xl flex flex-col justify-center relative overflow-hidden shadow-lg">
+                            <div class="absolute inset-0 opacity-30">
+                                <img src="pic16.jpg" alt="Super" class="w-full h-full object-cover">
+                            </div>
+                            <div class="relative z-10">
+                                <h4 class="font-bold text-teal-400 mb-2 drop-shadow-md">Pravidlo kritického myšlení</h4>
+                                <p class="text-sm text-gray-100 drop-shadow-md">AI je pokročilý "prediktor textu", nikoliv robotický
+                                    doktor. U složitých diagnóz slouží jako rychlý knihovník a generátor nápadů pro
+                                    diferenciální diagnostiku, nikoliv jako rozhodce.</p>
+                                <div class="mt-4 p-3 bg-gray-900/80 backdrop-blur-sm rounded border border-gray-700 text-xs">
+                                    <strong>Nástroj:</strong> Pro lékařskou rešerši nepoužívejte čistý ChatGPT, ale
+                                    <strong>Perplexity AI</strong>, který vyhledává rovnou ze zdrojů a přidává poznámky pod
+                                    čarou s prokliky na originální klinické studie.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Zobrazovací diagnostika -->
+                <div id="tab4" class="p-8 demo-tab hidden">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="flex flex-col">
+                            <h3 class="text-2xl font-bold text-navy mb-4">Certifikované nástroje pro praxi</h3>
+                            <p class="text-gray-700 mb-4 text-sm">V analýze RTG malých zvířat zažíváme boom. Tyto AI fungují jako <strong class="text-teal">"druhý názor"</strong>:</p>
+
+                            <div class="space-y-4 flex-grow">
+                                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded-r-lg">
+                                    <strong class="text-indigo-700 block mb-1">PicoxIA <span class="text-xs bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded-full ml-2">Evropský standard</span></strong>
+                                    <span class="text-sm text-gray-600 block">Francouzský nástroj. Analyzuje RTG hrudníku, břicha a kostí psů a koček. Nabízí velmi přehledné reporty a snadnou integraci do běžné praxe.</span>
+                                </div>
+
+                                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded-r-lg">
+                                    <strong class="text-indigo-700 block mb-1">SignalPET <span class="text-xs bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded-full ml-2">Globální lídr</span></strong>
+                                    <span class="text-sm text-gray-600 block">Identifikuje přes 50 patologií (osteoartritida, kardiomegalie). Vysoce vizuální reporty pomáhají skvěle vysvětlit diagnózu a obhájit cenu léčby majiteli.</span>
+                                </div>
+
+                                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded-r-lg">
+                                    <strong class="text-indigo-700 block mb-1">Vetology AI</strong>
+                                    <span class="text-sm text-gray-600 block">Specializace primárně na hrudní RTG (zvětšení srdce, plicní edém). Rychlé zhodnocení akutních případů.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 flex flex-col justify-center">
+                            <div class="media-container mb-4 shadow-md border-gray-300">
+                                <img src="pic5.png" alt="Fox" class="w-full">
+                            </div>
+                            
+                            <h4 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-stethoscope text-teal"></i> Co USG a CT/MRI?</h4>
+                            <p class="text-sm text-gray-600 mb-6">Zde zatím není tolik externích aplikací. AI (automatické měření ejekční frakce, hledání B-linií na plicích) je již <strong>přímo zabudovaná</strong> v moderních přístrojích (Mindray, GE, Philips).</p>
+
+                            <div class="text-xs text-gray-500 italic bg-white p-3 rounded border border-gray-200 text-left shadow-sm">
+                                <i class="fas fa-lightbulb mr-1 text-amber-500"></i> <strong>Tip pro zavedení:</strong> Začněte s AI na snímcích, kde diagnózu už bezpečně znáte (retrospektivně). Získáte k softwaru důvěru a zjistíte jeho limity.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Semafor použití AI -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-slate-50 reveal">
+        <div class="max-w-5xl mx-auto w-full">
+            <div class="text-center mb-8 lg:mb-10">
+                <span class="text-teal font-bold tracking-wider text-sm uppercase">Pravidla provozu</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-navy mt-2">Semafor použití AI v praxi</h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">Ne všechno je pro umělou inteligenci vhodné. Kde vám ušetří hodiny a kde naopak hrozí riziko?</p>
+            </div>
+            
+            <div class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-gray-200 flex flex-col md:flex-row items-center gap-8 lg:gap-12">
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="media-container shadow-none border-none max-w-xs md:max-w-none">
+                        <img src="semafor.png" alt="Semafor použití AI" class="w-full max-h-[50vh] object-contain drop-shadow-2xl">
+                    </div>
+                </div>
+                <div class="md:w-1/2 space-y-6 lg:space-y-8">
+                    <div class="flex gap-4 items-start bg-green-50/50 p-4 rounded-xl border border-green-100 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl shrink-0 border-2 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-navy text-xl">ZELENÁ: Delegujte naplno</h4>
+                            <p class="text-sm text-gray-600 mt-1">Marketing, posty na sítě, sumarizace dlouhých textů, e-maily klientům, návrhy preventivních programů. <strong class="text-green-600">Maximální úspora času, minimální riziko.</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 items-start bg-yellow-50/50 p-4 rounded-xl border border-yellow-100 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center text-xl shrink-0 border-2 border-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+                            <i class="fas fa-exclamation"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-navy text-xl">ORANŽOVÁ: S opatrností</h4>
+                            <p class="text-sm text-gray-600 mt-1">Diferenciální diagnostika, rešerše složitých případů, překlady studií. <strong class="text-yellow-600">Slouží jako "Druhý názor", je nutný váš odborný dohled a kritické myšlení.</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 items-start bg-red-50/50 p-4 rounded-xl border border-red-100 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xl shrink-0 border-2 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-navy text-xl">ČERVENÁ: Zóna zákazu</h4>
+                            <p class="text-sm text-gray-600 mt-1">Výpočet přesných dávek anestetik, definitivní diagnóza bez kontroly, sdílení citlivých osobních údajů. <strong class="text-red-600">Zde AI chybuje a zodpovědnost nesete vy.</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Síň hanby (Faily z praxe) -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-slate-900 text-white reveal relative overflow-hidden">
+        <div class="max-w-6xl mx-auto w-full relative z-10">
+            <div class="text-center mb-8 lg:mb-12">
+                <span class="text-red-500 font-bold tracking-wider text-sm uppercase">Odstrašující příklady</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold mt-2 text-white">Síň hanby: Když se zapomene na kritické myšlení</h2>
+                <p class="mt-4 text-gray-400 max-w-2xl mx-auto text-lg">Proč nesmíte k AI přistupovat jako k vyhledávači faktů? Tyto reálné případy z advokátní praxe vás přesvědčí.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+                <!-- Kauza Mata v. Avianca -->
+                <div class="bg-slate-800 p-6 rounded-2xl border-t-4 border-red-500 shadow-xl flex flex-col hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-plane-crash text-3xl text-red-500"></i>
+                        <div>
+                            <div class="text-xs text-gray-400 uppercase tracking-widest">USA, 2023</div>
+                            <h3 class="font-bold text-lg leading-tight">Mata v. Avianca</h3>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-4 flex-grow">
+                        Advokáti sepsali repliku pomocí ChatGPT. Ten si ale <strong>zcela vymyslel 6 fiktivních soudních rozsudků</strong>. Když je soud nenašel, AI je pro advokáta lživě potvrdila a vygenerovala jejich plný falešný text.
+                    </p>
+                    <div class="bg-red-500/10 p-3 rounded-lg border border-red-500/30">
+                        <strong class="text-red-400 text-xs uppercase block mb-1">Následek:</strong>
+                        <span class="text-sm">Pokuta 5 000 USD, omluvné dopisy soudcům a doživotně zničená reputace kanceláře.</span>
+                    </div>
+                </div>
+
+                <!-- Kauza Zhang v. Chen -->
+                <div class="bg-slate-800 p-6 rounded-2xl border-t-4 border-amber-500 shadow-xl flex flex-col hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-gavel text-3xl text-amber-500"></i>
+                        <div>
+                            <div class="text-xs text-gray-400 uppercase tracking-widest">Kanada, 2024</div>
+                            <h3 class="font-bold text-lg leading-tight">Zhang v. Chen</h3>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-4 flex-grow">
+                        Při složitém rozvodu se právnička opřela o <strong>dva smyšlené judikáty</strong> ohledně mezinárodní péče o děti. Protistrana strávila desítky hodin marným hledáním v databázích.
+                    </p>
+                    <div class="bg-amber-500/10 p-3 rounded-lg border border-amber-500/30">
+                        <strong class="text-amber-400 text-xs uppercase block mb-1">Následek:</strong>
+                        <span class="text-sm">Úhrada veškerých nákladů protistrany (tzv. special costs) a vyšetřování komorou za hrubou nedbalost.</span>
+                    </div>
+                </div>
+
+                <!-- Ústavní soud ČR -->
+                <div class="bg-slate-800 p-6 rounded-2xl border-t-4 border-sky-500 shadow-xl flex flex-col hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-landmark text-3xl text-sky-500"></i>
+                        <div>
+                            <div class="text-xs text-gray-400 uppercase tracking-widest">ČR, 2025</div>
+                            <h3 class="font-bold text-lg leading-tight">Ústavní soud</h3>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-4 flex-grow">
+                        Advokát použil AI pro ústavní stížnost. Výsledek? <strong>Vyhalucinovaný nález</strong> sp. zn. III. ÚS 2987/18, překroucená judikatura a smyšlený rozsudek Evropského soudu.
+                    </p>
+                    <div class="bg-sky-500/10 p-3 rounded-lg border border-sky-500/30">
+                        <strong class="text-sky-400 text-xs uppercase block mb-1">Následek:</strong>
+                        <span class="text-sm">Ostrá kritika soudu. AI vás nezbavuje odpovědnosti za obsah podání (sp. zn. I. ÚS 3004/25).</span>
+                    </div>
+                </div>
+
+                <!-- Úniky dat v ČR -->
+                <div class="bg-slate-800 p-6 rounded-2xl border-t-4 border-purple-500 shadow-xl flex flex-col hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-user-secret text-3xl text-purple-500"></i>
+                        <div>
+                            <div class="text-xs text-gray-400 uppercase tracking-widest">Denní praxe</div>
+                            <h3 class="font-bold text-lg leading-tight">Data Privacy Fail</h3>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-4 flex-grow">
+                        Zkopírování plné verze NDA (vč. RČ) do bezplatného ChatGPT pro "revizi". Nebo zadání výpovědi pro "Jana Nováka, r.č., za včerejší krádež v práci".
+                    </p>
+                    <div class="bg-purple-500/10 p-3 rounded-lg border border-purple-500/30">
+                        <strong class="text-purple-400 text-xs uppercase block mb-1">Následek:</strong>
+                        <span class="text-sm">Masivní porušení GDPR a advokátní mlčenlivosti (data odeslána na servery OpenAI na trénování).</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mýty a Nedůvěra (Zlaté pravidlo) -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-white reveal relative overflow-hidden">
+        <div class="max-w-5xl mx-auto w-full relative z-10">
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-center mb-8 lg:mb-10">
+                <div>
+                    <h2 class="text-3xl font-bold text-navy mb-6">Zlaté pravidlo a právní bezpečí</h2>
+                    <p class="text-gray-600">"Mám strach o pacientská data a nevěřím výsledkům." Zde jsou tři
+                        pilíře, jak na to bezpečně:</p>
+                </div>
+                <div class="media-container bg-black shadow-xl h-48 border-gray-200">
+                     <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-90">
+                        <source src="vid8.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="p-6 border border-gray-200 rounded-xl hover:border-teal transition-colors bg-white shadow-sm hover:shadow-md">
+                    <div class="text-3xl text-teal mb-4"><i class="fas fa-user-md"></i></div>
+                    <h3 class="font-bold text-navy mb-2">1. Druhý názor</h3>
+                    <p class="text-sm text-gray-600">Neberte AI jako "černou skříňku", ale jako kolegu ke konzultaci. Pokud se neshodnete, donutí vás to podívat se na snímek ještě jednou a pečlivěji.</p>
+                </div>
+                <div class="p-6 border border-gray-200 rounded-xl hover:border-teal transition-colors bg-white shadow-sm hover:shadow-md">
+                    <div class="text-3xl text-teal mb-4"><i class="fas fa-user-secret"></i></div>
+                    <h3 class="font-bold text-navy mb-2">2. Anonymizace</h3>
+                    <p class="text-sm text-gray-600">Většina kvalitních PACS/AI systémů umí data anonymizovat před odesláním. Do veřejných modelů (ChatGPT) naopak pište jen obecně "Klient a pes".</p>
+                </div>
+                <div class="p-6 border border-gray-200 rounded-xl hover:border-teal transition-colors bg-white shadow-sm hover:shadow-md">
+                    <div class="text-3xl text-teal mb-4"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="font-bold text-navy mb-2">3. Hodnota pro klienta</h3>
+                    <p class="text-sm text-gray-600">Barevný AI report (který hezky vyznačí např. zvětšené srdce) je skvělý nástroj. Majitel černobílému RTG nerozumí, ale barevný výstup z AI pochopí a lépe přijme cenu léčby.</p>
+                </div>
+                <div class="p-6 border border-gray-200 rounded-xl hover:border-teal transition-colors bg-white shadow-sm hover:shadow-md">
+                    <div class="text-3xl text-teal mb-4"><i class="fas fa-microscope"></i></div>
+                    <h3 class="font-bold text-navy mb-2">4. Chytrá nedůvěra</h3>
+                    <p class="text-sm text-gray-600">AI dokáže krásně strukturovat text, ale právní odpovědnost nesete vy. U složitých případů ji nechte odcitovat zdroje a křížově ověřujte.</p>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-lightbg p-6 rounded-xl flex items-center gap-6 border-l-4 border-navy">
+                <div class="hidden sm:block text-4xl text-navy opacity-50"><i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-navy">Advokátní tip:</h4>
+                    <p class="text-sm text-gray-600 mt-1">Srozumitelný informovaný souhlas a poučení (které vám AI
+                        vygeneruje za minutu do "lidštiny") eliminuje 90 % právních sporů před KVL. Klient, který textu
+                        rozumí, se málokdy soudí.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ekosystém Google Workspace (Optimalizace procesů) -->
+    <section class="min-h-screen flex flex-col justify-center py-6 lg:py-10 px-6 bg-slate-50 reveal">
+        <div class="max-w-6xl mx-auto w-full">
+            <div class="text-center mb-6 lg:mb-8">
+                <span class="text-teal font-bold tracking-wider text-sm uppercase">Optimalizace procesů bez chaosu</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-navy mt-2">Nepotřebujete 10 aplikací. Stačí jeden ekosystém.</h2>
+                <p class="mt-4 text-gray-600 max-w-3xl mx-auto text-lg">Pro menší týmy je zavádění izolovaných aplikací překážkou. Nejefektivnějším řešením je využití <strong>Google Workspace obohaceného o AI (Gemini)</strong>, který řeší i vaše obavy o bezpečnost.</p>
+            </div>
+
+            <!-- Hlavní grid pro ekosystém -->
+            <div class="grid md:grid-cols-2 gap-6 lg:gap-8 mb-8">
+                <!-- Propojenost a Bezpečnost -->
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex gap-4 hover:border-teal transition-all">
+                        <div class="text-teal text-3xl"><i class="fab fa-google"></i></div>
+                        <div>
+                            <h4 class="font-bold text-navy text-lg mb-1">Jednoduchá provázanost</h4>
+                            <p class="text-sm text-gray-600">Jediné prostředí propojuje nástroje, které už možná znáte: Gmail (komunikace), Disk (šablony), Kalendář (plánování) a Úkoly (připomenutí). Vše pod jednou střechou, navzájem propojené přes Gemini.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex gap-4 hover:border-teal transition-all">
+                        <div class="text-navy text-3xl"><i class="fas fa-shield-alt"></i></div>
+                        <div>
+                            <h4 class="font-bold text-navy text-lg mb-1">Robustní zabezpečení (Enterprise)</h4>
+                            <p class="text-sm text-gray-600">Firemní verze Google Workspace poskytují plně zabezpečené prostředí. Garantují, že data vašich klientů a zvířat <strong>nejsou využívána</strong> k trénování veřejných AI modelů.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Praktické využití v praxi -->
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="bg-navy text-white p-5 rounded-xl border border-slate-700">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fas fa-calendar-check text-teal-400 text-xl"></i>
+                            <h4 class="font-bold">Automatické rezervace termínů</h4>
+                        </div>
+                        <p class="text-sm text-gray-300">Skvělé pro terénní doktory. Vyčleníte si v Kalendáři blok (např. 13:00–15:00 pro vakcinace). Klientům pošlete odkaz, vyberou si čas a schůzka se vám sama propíše do mobilu.</p>
+                    </div>
+
+                    <div class="bg-slate-800 text-white p-5 rounded-xl border border-slate-700">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fas fa-search text-teal-400 text-xl"></i>
+                            <h4 class="font-bold">Viditelnost dat "skrz naskrz"</h4>
+                        </div>
+                        <p class="text-sm text-gray-300">Gemini (po povolení) prohledá celý váš Workspace. Příklad: <em class="text-teal-200">"Najdi mi v e-mailech a na Disku veškerou loňskou komunikaci s chovatelem Novákem a shrň, jaké léky jsme dali jeho stádu."</em> Ušetřeno 15 minut hledání.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NotebookLM Highlight -->
+            <div class="bg-teal/10 border border-teal/20 rounded-3xl p-6 lg:p-8 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-teal"><i class="fas fa-book-medical text-[15rem]"></i></div>
+                <div class="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-2/3">
+                        <div class="inline-block bg-teal text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">Absolutní game changer pro veterináře</div>
+                        <h3 class="text-2xl font-bold text-navy mb-3">Google NotebookLM: Konec halucinacím</h3>
+                        <p class="text-gray-700 mb-4">Umožňuje nahrát pouze vaše vlastní zdroje (interní protokoly, ceníky, kazuistiky, PDF z laboratoře). AI pak hledá odpovědi <strong>přísně jen v těchto dokumentech a nevymýšlí si</strong>.</p>
+                        <div class="bg-white p-4 rounded-xl border border-gray-200 text-sm">
+                            <strong class="text-navy">Příklad z praxe:</strong><br>
+                            Nahrajete krevní výsledky zvířete za poslední 3 roky a řeknete: <em>"Analyzuj dokumenty a udělej mi graf vývoje jaterních enzymů."</em> NotebookLM pracuje jen s dodanými PDF!
+                        </div>
+                    </div>
+                    <div class="md:w-1/3 flex justify-center">
+                        <div class="w-32 h-32 md:w-48 md:h-48 bg-white rounded-full flex items-center justify-center border-8 border-teal/20 shadow-xl">
+                            <i class="fas fa-brain text-5xl md:text-7xl text-teal"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kde začít (Překonání bariéry) -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 bg-teal text-white reveal">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Nevíte, jak začít a nemáte čas?</h2>
+            <p class="text-teal-100 mb-8 lg:mb-10 text-lg">Průzkum ukázal obří časový paradox: Chcete šetřit čas, ale nemáte čas
+                to implementovat. Zde jsou první 3 kroky:</p>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white/10 p-8 rounded-2xl backdrop-blur-sm border border-white/20">
+                    <div
+                        class="w-12 h-12 bg-white text-teal rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-6">
+                        1</div>
+                    <h3 class="font-bold mb-2">Identifikujte žrouta</h3>
+                    <p class="text-sm text-teal-100">Vyberte jen jednu úmornou věc. Třeba zprávy klientům. Na zbytek
+                        zapomeňte.</p>
+                </div>
+                <div class="bg-white/10 p-8 rounded-2xl backdrop-blur-sm border border-white/20">
+                    <div
+                        class="w-12 h-12 bg-white text-teal rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-6">
+                        2</div>
+                    <h3 class="font-bold mb-2">Začněte hned</h3>
+                    <p class="text-sm text-teal-100">Jděte na gemini.google.com. Stačí vám google účet.</p>
+                </div>
+                <div class="bg-white/10 p-8 rounded-2xl backdrop-blur-sm border border-white/20">
+                    <div
+                        class="w-12 h-12 bg-white text-teal rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-6">
+                        3</div>
+                    <h3 class="font-bold mb-2">První pokus zítra</h3>
+                    <p class="text-sm text-teal-100">Cílem není změnit kliniku. Cílem je zítra ušetřit prvních 15 minut.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Můj příběh (Osa času) -->
+    <section class="min-h-screen flex flex-col justify-center py-8 lg:py-12 px-6 bg-slate-50 reveal">
+        <div class="max-w-5xl mx-auto w-full">
+            <div class="text-center mb-6 md:mb-8">
+                <span class="text-teal font-bold tracking-wider text-sm uppercase">Osobní zkušenost</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-extrabold text-navy mt-2">Slepé uličky už jsou prošlapané</h2>
+                <p class="mt-3 text-gray-600 max-w-3xl mx-auto text-base md:text-lg leading-snug">Když jsem s AI na začátku roku 2023 začínal, bylo to jako učit se chodit. Vy už si frustrací z nesplněných očekávání procházet nemusíte.</p>
+            </div>
+            
+            <div class="relative py-2">
+                <!-- Spojovací vertikální linie -->
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-teal/20 -translate-x-1/2 rounded"></div>
+                
+                <div class="grid md:grid-cols-2 gap-4 md:gap-8 items-center">
+                    <!-- Rok 2023 -->
+                    <div class="bg-white p-5 md:p-6 rounded-3xl border border-gray-200 shadow-sm relative text-left md:text-right md:pr-10 transform transition hover:-translate-y-1">
+                        <!-- Indikátor osy -->
+                        <div class="hidden md:flex absolute top-1/2 -right-11 w-6 h-6 bg-gray-300 rounded-full border-4 border-slate-50 z-10 -translate-y-1/2"></div>
+                        
+                        <div class="inline-block bg-gray-100 text-gray-500 font-bold py-1 px-3 rounded-full text-xs mb-3 uppercase tracking-wider">Začátek roku 2023</div>
+                        <h3 class="text-xl md:text-2xl font-bold text-navy mb-2">Éra pokusů a omylů</h3>
+                        <p class="text-gray-600 text-sm md:text-base mb-4 leading-relaxed">Získat kvalitní text znamenalo studovat složitý "prompt engineering" a čelit neustálým chybám a smyšlenkám.</p>
+                        
+                        <div class="flex flex-col md:items-end">
+                            <ul class="text-gray-500 text-sm space-y-1 text-left bg-gray-50 p-3 rounded-xl border border-gray-100 inline-block w-full sm:w-auto">
+                                <li><i class="fas fa-times text-red-400 w-5"></i> Časté halucinace a výmysly</li>
+                                <li><i class="fas fa-times text-red-400 w-5"></i> Složité programování příkazů</li>
+                                <li><i class="fas fa-times text-red-400 w-5"></i> Omezeno jen na suchý text</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Dnes -->
+                    <div class="bg-navy p-5 md:p-6 rounded-3xl border-2 border-teal shadow-xl relative md:pl-10 md:translate-y-8 transform transition hover:scale-[1.02]">
+                        <!-- Indikátor osy -->
+                        <div class="hidden md:flex absolute top-1/2 -left-11 w-6 h-6 bg-teal rounded-full border-4 border-slate-50 z-10 shadow-[0_0_15px_rgba(14,165,233,0.5)] -translate-y-1/2"></div>
+                        
+                        <div class="inline-block bg-teal text-white font-bold py-1 px-3 rounded-full text-xs mb-3 uppercase tracking-wider">Dnešní realita</div>
+                        <h3 class="text-xl md:text-2xl font-bold text-white mb-2">Umělec, analytik i asistent</h3>
+                        <p class="text-gray-300 text-sm md:text-base mb-4 leading-relaxed">Halucinace se omezily a složitý engineering nahradila přirozená konverzace. AI už není jen hračka, je to hotový ekosystém.</p>
+                        
+                        <ul class="text-sky-100 text-sm space-y-1 bg-slate-800 p-3 rounded-xl border border-slate-700 inline-block w-full sm:w-auto">
+                            <li><i class="fas fa-check text-teal w-5"></i> Živý přístup k internetu</li>
+                            <li><i class="fas fa-check text-teal w-5"></i> Analýza dat, fotek i videí</li>
+                            <li><i class="fas fa-check text-teal w-5"></i> Samostatné plnění úkolů</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 md:mt-16 text-center max-w-2xl mx-auto bg-white p-4 md:p-6 rounded-2xl border border-teal/30 shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-2 h-full bg-teal"></div>
+                <p class="text-lg md:text-xl font-heading font-bold text-navy leading-snug">Nejlepší čas začít s AI byl před rokem.<br>Druhý nejlepší čas je <span class="text-teal">právě teď.</span></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Závěr / CTA -->
+    <footer class="bg-navy text-white min-h-screen flex flex-col justify-center py-8 lg:py-16 px-6 text-center relative overflow-hidden">
+        <div class="absolute inset-0 z-0">
+             <video autoplay muted loop playsinline class="bg-vid" style="opacity: 0.2">
+                <source src="vid9.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="max-w-3xl mx-auto relative z-10">
+            <h2 class="text-3xl font-bold mb-6 drop-shadow-md">Nemáte čas to zkoušet sami?</h2>
+            <p class="text-gray-300 mb-8 lg:mb-10 text-lg drop-shadow">Experimentování s AI stojí čas, který nemáte. Pokud chcete vidět, jak
+                naplno využít běžně dostupné nástroje (Google Workspace a Gemini) pro vaši každodenní agendu,
+                <strong class="text-white">zvu vás na praktické workshopy.</strong>
+            </p>
+
+            <div
+                class="flex flex-col md:flex-row items-center justify-center gap-12 bg-slate-800/50 p-8 md:p-12 rounded-3xl border border-slate-700 mb-8 shadow-2xl">
+                <div class="text-left">
+                    <div class="text-teal-400 font-bold mb-2 uppercase tracking-widest text-sm"><i
+                            class="fas fa-globe mr-2"></i>Web & Workshopy</div>
+                    <div class="text-4xl md:text-5xl font-heading font-extrabold text-white mb-8 whitespace-nowrap">
+                        ai-workshop.cz</div>
+
+                    <div class="text-teal-400 font-bold mb-2 uppercase tracking-widest text-sm"><i
+                            class="fas fa-address-card mr-2"></i>Kontakt</div>
+                    <div class="text-2xl font-bold text-white mb-1">Mgr. Gabriel Kožík</div>
+                    <div class="text-gray-400 text-lg">gabrielkozik.com</div>
+                </div>
+
+                <!-- QR Vizitka -->
+                <div
+                    class="bg-white p-6 rounded-3xl shadow-[0_0_30px_rgba(14,165,233,0.3)] flex flex-col items-center border-4 border-teal transform transition hover:scale-105">
+                    <img src="QRvizitka.png" alt="QR Vizitka" class="w-64 h-64 md:w-72 md:h-72 object-contain">
+                    <p class="text-navy font-heading font-bold mt-4 uppercase tracking-widest text-lg">Naskenujte si
+                        vizitku</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lightbox Overlay -->
+    <div id="lightbox" class="fixed inset-0 z-[100] bg-black/95 hidden flex items-center justify-center opacity-0 transition-opacity duration-300 cursor-zoom-out backdrop-blur-sm">
+        <div id="lightbox-content" class="max-w-[95vw] max-h-[95vh] relative flex items-center justify-center"></div>
+        <button id="lightbox-close" class="absolute top-6 right-6 text-white text-5xl hover:text-teal transition-colors focus:outline-none">&times;</button>
+    </div>
+
+    <script>
+        // Simple scroll reveal animation
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); // Trigger on load
+
+        // ==========================================
+        // Logika pro prezentační kliker (Pointer)
+        // ==========================================
+        const slides = document.querySelectorAll('header, section, footer');
+        let currentSlideIndex = 0;
+        let currentTabIndex = 1;
+        const totalTabs = 4;
+
+        // Synchronizace manuálního kliknutí myší na záložky
+        document.querySelectorAll('.tab-btn').forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                currentTabIndex = index + 1;
+            });
+        });
+
+        // Naslouchání stisku kláves z klikeru (Šipky, PageUp/Down, Mezerník)
+        window.addEventListener('keydown', function (e) {
+            // Zavření lightboxu při stisku Escape a zablokování posunu
+            if (typeof isLightboxOpen !== 'undefined' && isLightboxOpen) {
+                if (e.code === 'Escape' || e.code === 'Space' || e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
+                    closeLightbox();
+                }
+                e.preventDefault();
+                return;
+            }
+
+            // Definice kláves pro posun vpřed a vzad
+            const isNext = ['Space', 'ArrowRight', 'ArrowDown', 'PageDown'].includes(e.code);
+            const isPrev = ['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.code);
+
+            if (isNext || isPrev) {
+                e.preventDefault(); // Zabráníme defaultnímu skokovému posunu prohlížeče
+
+                const currentSlide = slides[currentSlideIndex];
+                // Zkontrolujeme, zda jsme v sekci "Aha efekt" obsahující záložky (tabs)
+                const isAhaSection = currentSlide.querySelector('#tab1') !== null;
+
+                if (isNext) {
+                    if (isAhaSection && currentTabIndex < totalTabs) {
+                        // Jsme v Aha sekci a máme další záložky -> pouze přepneme záložku
+                        currentTabIndex++;
+                        switchTab('tab' + currentTabIndex);
+                    } else if (currentSlideIndex < slides.length - 1) {
+                        // Běžný posun na další slajd (sekci)
+                        currentSlideIndex++;
+                        slides[currentSlideIndex].scrollIntoView({ behavior: 'smooth' });
+                    }
+                } else if (isPrev) {
+                    if (isAhaSection && currentTabIndex > 1) {
+                        // Jsme v Aha sekci a můžeme jít na předchozí záložku
+                        currentTabIndex--;
+                        switchTab('tab' + currentTabIndex);
+                    } else if (currentSlideIndex > 0) {
+                        // Běžný posun na předchozí slajd
+                        currentSlideIndex--;
+                        slides[currentSlideIndex].scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }
+        });
+
+        // Automatická synchronizace aktuálního slajdu při scrollování kolečkem myši
+        window.addEventListener('scroll', function () {
+            // Progress bar update
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("progressBar").style.width = scrolled + "%";
+
+            let minDiff = Infinity;
+            slides.forEach((slide, index) => {
+                const diff = Math.abs(slide.getBoundingClientRect().top);
+                // Nastavíme index podle toho, která sekce je aktuálně nejblíže hornímu okraji
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    currentSlideIndex = index;
+                }
+            });
+        });
+
+        // ==========================================
+        // Lightbox (Fullscreen Media) Logika
+        // ==========================================
+        const lightbox = document.getElementById('lightbox');
+        const lightboxContent = document.getElementById('lightbox-content');
+        const lightboxClose = document.getElementById('lightbox-close');
+        let isLightboxOpen = false;
+
+        // Najdeme všechny interaktivní obrázky a videa
+        const mediaElements = document.querySelectorAll('.media-container img, .media-container video');
+        
+        mediaElements.forEach(el => {
+            el.classList.add('cursor-zoom-in', 'transition-transform', 'hover:scale-[1.02]');
+            
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                lightboxContent.innerHTML = '';
+                
+                const isVideo = el.tagName === 'VIDEO';
+                
+                if (isVideo) {
+                    const videoSrc = el.querySelector('source') ? el.querySelector('source').src : el.src;
+                    const videoNode = document.createElement('video');
+                    videoNode.src = videoSrc;
+                    videoNode.controls = true;
+                    videoNode.autoplay = true;
+                    videoNode.className = 'max-w-[95vw] max-h-[95vh] rounded-lg shadow-2xl';
+                    lightboxContent.appendChild(videoNode);
+                } else {
+                    const imgNode = document.createElement('img');
+                    imgNode.src = el.src;
+                    imgNode.className = 'max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl';
+                    lightboxContent.appendChild(imgNode);
+                }
+                
+                lightbox.classList.remove('hidden');
+                setTimeout(() => {
+                    lightbox.classList.remove('opacity-0');
+                    lightbox.classList.add('opacity-100');
+                }, 10);
+                
+                isLightboxOpen = true;
+            });
+        });
+
+        const closeLightbox = () => {
+            lightbox.classList.remove('opacity-100');
+            lightbox.classList.add('opacity-0');
+            
+            const videoInLightbox = lightboxContent.querySelector('video');
+            if(videoInLightbox) videoInLightbox.pause();
+            
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+                lightboxContent.innerHTML = '';
+                isLightboxOpen = false;
+            }, 300);
+        };
+
+        lightbox.addEventListener('click', closeLightbox);
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightboxContent.addEventListener('click', (e) => e.stopPropagation());
+    </script>
+</body>
+
+</html>
